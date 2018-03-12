@@ -36,7 +36,7 @@ class Crawler(threading.Thread):
         try:
             try:
             	# Change the file name below this to change where the links are written to
-                file = open("videolinks_v2.csv", "w+")#every time delete the old file and then write
+                file = open("search_word_repeated.csv", "w+")#every time delete the old file and then write
             except:
                 print ("Failed to open file.")
 
@@ -130,14 +130,14 @@ class Crawler(threading.Thread):
         xml = f.read()
         return xml
 
-    def getYoutube(self, html, link):
+    def getKeyword(self, html, link):
         #r=r'https://www.usfca.edu.*'
         #r = match
         re_video=re.compile(r'' + keyword + '.*? ')
         content = html.decode("utf-8").lower()
         videolinks = set(re.findall(re_video, content))
 
-        return {'youtube' : list(videolinks), 'link': link}
+        return {'keyword' : list(videolinks), 'link': link}
 
     def getLinks(self, html):
         r=r'<loc>.*</loc>'
@@ -170,14 +170,10 @@ class Crawler(threading.Thread):
                     request = build_request(link)
                     f = urlopen(request, timeout=3)
                     xml = f.read()
-                    youtubes = self.getYoutube(xml, link)
-                    l = len(youtubes['youtube'])
-                    for i in range(l):
-                        youtubeURL = youtubes['youtube'][i][:-1]
-                        if youtubeURL in res: continue
-                        res.append(youtubeURL)
-                        print (youtubeURL + ", " + youtubes['link'])
-                        file.write(youtubeURL + "," + youtubes['link'] + "\n")
+                    links = self.getKeyword(xml, link)
+                    if len(links['keyword'])!=0:
+                        print (links['keyword'][0] + "," + links['link'])
+                        file.write(links['keyword'][0] + "," + links['link'] + "\n")
                         file.flush()
 
         return GAME_OVER
