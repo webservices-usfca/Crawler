@@ -12,7 +12,7 @@ import urllib3
 import re
 import ssl
 
-ssl._create_default_https_context = ssl._create_unverified_context
+ssl._create_default_https_context = ssl._create_unverified_context #some computer need this for urllib open
 
 shutdown_event = None
 GAME_OVER = "game over"

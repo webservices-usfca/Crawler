@@ -16,7 +16,8 @@ ssl._create_default_https_context = ssl._create_unverified_context #some compute
 
 shutdown_event = None
 GAME_OVER = "game over"
-keyword = "branch campus" #you can change keyword here
+keyword1 = "<iframe>"
+keyword2 = "</iframe>"
 
 def build_request(url, data=None, headers={}):
     headers["User-Agent"] = "Dynamsoft"
@@ -36,7 +37,7 @@ class Crawler(threading.Thread):
         try:
             try:
             	# Change the file name below this to change where the links are written to
-                file = open("search_word_repeated.csv", "w+")#every time delete the old file and then write
+                file = open("element_search.csv", "w+")#every time delete the old file and then write
             except:
                 print ("Failed to open file.")
 
@@ -101,6 +102,8 @@ class Crawler(threading.Thread):
     def readSiteMap(self):
         pages = []
         try:
+            # f = urlopen("http://www.codepool.biz/sitemap.xml")
+            # Change the link when you need to crawl a different page
             url = "https://www.usfca.edu/sitemap.xml"
             maps = self.getLinks(self.getHtml(url))
             for map in maps:
@@ -110,7 +113,6 @@ class Crawler(threading.Thread):
 
                 soup = BeautifulSoup(xml)
                 urlTags = soup.find_all("url")
-                # print(urlTags)
 
                 print ("The number of url tags in sitemap: ", str(len(urlTags)))
 
@@ -131,13 +133,10 @@ class Crawler(threading.Thread):
         return xml
 
     def getKeyword(self, html, link):
-        #r=r'https://www.usfca.edu.*'
-        #r = match
-        re_video=re.compile(r'' + keyword + '.*? ')
-        content = html.decode("utf-8").lower()
-        videolinks = set(re.findall(re_video, content))
+        re_key=re.compile(r'' + keyword1 + '.*' + keyword2)
 
-        return {'keyword' : list(videolinks), 'link': link}
+        keylinks = set(re.findall(re_key, html.decode("utf-8")))
+        return {'keyword' : list(keylinks), 'link': link}
 
     def getLinks(self, html):
         r=r'<loc>.*</loc>'
@@ -147,7 +146,6 @@ class Crawler(threading.Thread):
         for usfmap in temps:
             maps.append(usfmap[5:-6])
         return maps
-
 
     def crawlLinks(self, links, pages, file=None):
         res = []
@@ -170,10 +168,14 @@ class Crawler(threading.Thread):
                     request = build_request(link)
                     f = urlopen(request, timeout=3)
                     xml = f.read()
-                    links = self.getKeyword(xml, link)
-                    if len(links['keyword'])!=0:
-                        print (links['keyword'][0] + "," + links['link'])
-                        file.write(links['keyword'][0] + "," + links['link'] + "\n")
+                    keywords = self.getKeyword(xml, link)
+                    l = len(keywords['keyword'])
+                    for i in range(l):
+                        keywordsURL = keywords['keyword'][i][:-1]
+                        if keywordsURL in res: continue
+                        res.append(keywordsURL)
+                        print (keywordsURL + "," + keywords['link'])
+                        file.write(keywordsURL + "," + keywords['link'] + "\n")
                         file.flush()
 
         return GAME_OVER

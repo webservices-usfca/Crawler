@@ -10,6 +10,9 @@ import sys
 import time
 import urllib3
 import re
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context #some computer need this for urllib open
 
 shutdown_event = None
 GAME_OVER = "game over"
@@ -109,7 +112,6 @@ class Crawler(threading.Thread):
 
                 soup = BeautifulSoup(xml)
                 urlTags = soup.find_all("url")
-                # print(urlTags)
 
                 print ("The number of url tags in sitemap: ", str(len(urlTags)))
 
@@ -143,7 +145,6 @@ class Crawler(threading.Thread):
         for usfmap in temps:
             maps.append(usfmap[5:-6])
         return maps
-
 
     def crawlLinks(self, links, pages, file=None):
         res = []
