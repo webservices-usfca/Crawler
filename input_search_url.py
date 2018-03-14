@@ -45,7 +45,7 @@ class Crawler(threading.Thread):
         try:
             try:
             	# Change the file name below this to change where the links are written to
-                file = open("inputword.csv", "w+")#every time delete the old file and then write
+                file = open("input_search_url.csv", "w+")#every time delete the old file and then write
             except:
                 print ("Failed to open file.")
 
@@ -142,7 +142,6 @@ class Crawler(threading.Thread):
 
     def getKeyword(self, html, link):
         re_key=re.compile(r'' + keyword + '.*?"')
-
         keylinks = set(re.findall(re_key, html.decode("utf-8").lower()))
         return {'keyword' : list(keylinks), 'link': link}
 

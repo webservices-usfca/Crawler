@@ -41,7 +41,7 @@ class Crawler(threading.Thread):
         try:
             try:
             	# Change the file name below this to change where the links are written to
-                file = open("element_repeated_2.csv", "w+")#every time delete the old file and then write
+                file = open("element_search_repeated.csv", "w+")#every time delete the old file and then write
             except:
                 print ("Failed to open file.")
 
@@ -156,7 +156,6 @@ class Crawler(threading.Thread):
 
     def crawlLinks(self, links, pages, file=None):
         res = []
-        count = 0
         for link in pages:
             if shutdown_event.isSet():
                 return GAME_OVER
@@ -176,11 +175,9 @@ class Crawler(threading.Thread):
                     request = build_request(link)
                     f = urlopen(request, timeout=3)
                     xml = f.read()
-                    count += 1
-                    print (count)
                     links = self.getKeyword(xml, link)
                     for i in links['keyword']:
-                        if "www.googletagmanager.com/ns.html?id=gtm-nmx8dc" in i:
+                        if "www.googletagmanager.com/ns.html?id=gtm-nmx8dc" in i:  # this is for iframe, if you want to search other one please remove this if statment
                             continue
                         print (i + "," + links['link'])
                         file.write(i + "," + links['link'] + "\n")

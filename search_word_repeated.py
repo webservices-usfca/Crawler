@@ -157,7 +157,6 @@ class Crawler(threading.Thread):
 
     def crawlLinks(self, links, pages, file=None):
         res = []
-        count = 0
         for link in pages:
             if shutdown_event.isSet():
                 return GAME_OVER
@@ -174,8 +173,6 @@ class Crawler(threading.Thread):
                     status_code = HTTPError
 
                 if status_code == 200:
-                    count += 1
-                    print(count)
                     request = build_request(link)
                     f = urlopen(request, timeout=3)
                     xml = f.read()

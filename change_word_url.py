@@ -41,7 +41,7 @@ class Crawler(threading.Thread):
         try:
             try:
             	# Change the file name below this to change where the links are written to
-                file = open("videolinks_v2.csv", "w+")#every time delete the old file and then write
+                file = open("change_word_url.csv", "w+")#every time delete the old file and then write
             except:
                 print ("Failed to open file.")
 
@@ -135,14 +135,14 @@ class Crawler(threading.Thread):
         xml = f.read()
         return xml
 
-    def getYoutube(self, html, link):
+    def getKeyword(self, html, link):
         #r=r'https://www.usfca.edu.*'
         #r = match
-        re_video=re.compile(r'' + keyword + '.*? ')
+        re_keyword=re.compile(r'' + keyword + '.*? ')
         content = html.decode("utf-8").lower()
-        videolinks = set(re.findall(re_video, content))
+        links = set(re.findall(re_keyword, content))
 
-        return {'youtube' : list(videolinks), 'link': link}
+        return {'keyword' : list(links), 'link': link}
 
     def getLinks(self, html):
         r=r'<loc>.*</loc>'
@@ -175,14 +175,14 @@ class Crawler(threading.Thread):
                     request = build_request(link)
                     f = urlopen(request, timeout=3)
                     xml = f.read()
-                    youtubes = self.getYoutube(xml, link)
-                    l = len(youtubes['youtube'])
+                    keywords = self.getKeyword(xml, link)
+                    l = len(keywords['keyword'])
                     for i in range(l):
-                        youtubeURL = youtubes['youtube'][i][:-1]
-                        if youtubeURL in res: continue
-                        res.append(youtubeURL)
-                        print (youtubeURL + ", " + youtubes['link'])
-                        file.write(youtubeURL + "," + youtubes['link'] + "\n")
+                        keywordURL = keywords['keyword'][i][:-1]
+                        if keywordURL in res: continue
+                        res.append(keywordURL)
+                        print (keywordURL + ", " + keywords['link'])
+                        file.write(keywordURL + "," + keywords['link'] + "\n")
                         file.flush()
 
         return GAME_OVER
