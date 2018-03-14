@@ -1,3 +1,7 @@
+# This is for the situation that we want the link that contains certain html elements
+# we want to keep both links and elements
+# the element can be repeated, we need to get all links contain the elements
+
 try:
     from urllib3 import urlopen, Request, HTTPError, URLError
 except ImportError:
@@ -16,7 +20,7 @@ ssl._create_default_https_context = ssl._create_unverified_context #some compute
 
 shutdown_event = None
 GAME_OVER = "game over"
-keyword1 = "<iframe>"
+keyword1 = "<iframe"
 keyword2 = "</iframe>"
 
 def build_request(url, data=None, headers={}):
@@ -37,7 +41,7 @@ class Crawler(threading.Thread):
         try:
             try:
             	# Change the file name below this to change where the links are written to
-                file = open("element_repeated.csv", "w+")#every time delete the old file and then write
+                file = open("element_repeated_2.csv", "w+")#every time delete the old file and then write
             except:
                 print ("Failed to open file.")
 
@@ -143,7 +147,7 @@ class Crawler(threading.Thread):
     def getLinks(self, html):
         r=r'<loc>.*</loc>'
         re_maps = re.compile(r)
-        temps = set(re.findall(re_maps, html.decode("utf-8")))
+        temps = set(re.findall(re_maps, html.decode("utf-8").lower()))
         maps = []
         for usfmap in temps:
             maps.append(usfmap[5:-6])
@@ -152,6 +156,7 @@ class Crawler(threading.Thread):
 
     def crawlLinks(self, links, pages, file=None):
         res = []
+        count = 0
         for link in pages:
             if shutdown_event.isSet():
                 return GAME_OVER
@@ -171,8 +176,12 @@ class Crawler(threading.Thread):
                     request = build_request(link)
                     f = urlopen(request, timeout=3)
                     xml = f.read()
+                    count += 1
+                    print (count)
                     links = self.getKeyword(xml, link)
                     for i in links['keyword']:
+                        if "www.googletagmanager.com/ns.html?id=gtm-nmx8dc" in i:
+                            continue
                         print (i + "," + links['link'])
                         file.write(i + "," + links['link'] + "\n")
                         file.flush()

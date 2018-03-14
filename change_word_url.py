@@ -1,3 +1,8 @@
+# This is for the situation that we want the certain url contains on the link
+# the url we get is most important and unique
+# url cannot be unique, link only identify their origin.
+# change keyword variable to get the url
+
 try:
     from urllib3 import urlopen, Request, HTTPError, URLError
 except ImportError:
@@ -16,7 +21,7 @@ ssl._create_default_https_context = ssl._create_unverified_context #some compute
 
 shutdown_event = None
 GAME_OVER = "game over"
-keyword = input('Please enter your key word here:') #key word here
+keyword = "www.youtube" #you can change keyword here
 
 def build_request(url, data=None, headers={}):
     headers["User-Agent"] = "Dynamsoft"
@@ -36,7 +41,7 @@ class Crawler(threading.Thread):
         try:
             try:
             	# Change the file name below this to change where the links are written to
-                file = open("inputword.csv", "w+")#every time delete the old file and then write
+                file = open("videolinks_v2.csv", "w+")#every time delete the old file and then write
             except:
                 print ("Failed to open file.")
 
@@ -101,8 +106,6 @@ class Crawler(threading.Thread):
     def readSiteMap(self):
         pages = []
         try:
-            # f = urlopen("http://www.codepool.biz/sitemap.xml")
-            # Change the link when you need to crawl a different page
             url = "https://www.usfca.edu/sitemap.xml"
             maps = self.getLinks(self.getHtml(url))
             for map in maps:
@@ -112,6 +115,7 @@ class Crawler(threading.Thread):
 
                 soup = BeautifulSoup(xml)
                 urlTags = soup.find_all("url")
+                # print(urlTags)
 
                 print ("The number of url tags in sitemap: ", str(len(urlTags)))
 
@@ -131,20 +135,24 @@ class Crawler(threading.Thread):
         xml = f.read()
         return xml
 
-    def getKeyword(self, html, link):
-        re_key=re.compile(r'' + keyword + '.*?"')
+    def getYoutube(self, html, link):
+        #r=r'https://www.usfca.edu.*'
+        #r = match
+        re_video=re.compile(r'' + keyword + '.*? ')
+        content = html.decode("utf-8").lower()
+        videolinks = set(re.findall(re_video, content))
 
-        keylinks = set(re.findall(re_key, html.decode("utf-8")))
-        return {'keyword' : list(keylinks), 'link': link}
+        return {'youtube' : list(videolinks), 'link': link}
 
     def getLinks(self, html):
         r=r'<loc>.*</loc>'
         re_maps = re.compile(r)
-        temps = set(re.findall(re_maps, html.decode("utf-8")))
+        temps = set(re.findall(re_maps, html.decode("utf-8").lower()))
         maps = []
         for usfmap in temps:
             maps.append(usfmap[5:-6])
         return maps
+
 
     def crawlLinks(self, links, pages, file=None):
         res = []
@@ -167,14 +175,14 @@ class Crawler(threading.Thread):
                     request = build_request(link)
                     f = urlopen(request, timeout=3)
                     xml = f.read()
-                    keywords = self.getKeyword(xml, link)
-                    l = len(keywords['keyword'])
+                    youtubes = self.getYoutube(xml, link)
+                    l = len(youtubes['youtube'])
                     for i in range(l):
-                        keywordsURL = keywords['keyword'][i][:-1]
-                        if keywordsURL in res: continue
-                        res.append(keywordsURL)
-                        print (keywordsURL + "," + keywords['link'])
-                        file.write(keywordsURL + "," + keywords['link'] + "\n")
+                        youtubeURL = youtubes['youtube'][i][:-1]
+                        if youtubeURL in res: continue
+                        res.append(youtubeURL)
+                        print (youtubeURL + ", " + youtubes['link'])
+                        file.write(youtubeURL + "," + youtubes['link'] + "\n")
                         file.flush()
 
         return GAME_OVER

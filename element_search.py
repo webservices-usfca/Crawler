@@ -1,3 +1,7 @@
+# This is for the situation that we want the link that contains certain html elements
+# the link is most important, element not
+# the element cannot be repeated, we need to get all links contain the elements
+
 try:
     from urllib3 import urlopen, Request, HTTPError, URLError
 except ImportError:
@@ -16,7 +20,7 @@ ssl._create_default_https_context = ssl._create_unverified_context #some compute
 
 shutdown_event = None
 GAME_OVER = "game over"
-keyword1 = "<iframe>"
+keyword1 = "<iframe"
 keyword2 = "</iframe>"
 
 def build_request(url, data=None, headers={}):
@@ -135,19 +139,20 @@ class Crawler(threading.Thread):
     def getKeyword(self, html, link):
         re_key=re.compile(r'' + keyword1 + '.*' + keyword2)
 
-        keylinks = set(re.findall(re_key, html.decode("utf-8")))
+        keylinks = set(re.findall(re_key, html.decode("utf-8").lower()))
         return {'keyword' : list(keylinks), 'link': link}
 
     def getLinks(self, html):
         r=r'<loc>.*</loc>'
         re_maps = re.compile(r)
-        temps = set(re.findall(re_maps, html.decode("utf-8")))
+        temps = set(re.findall(re_maps, html.decode("utf-8").lower()))
         maps = []
         for usfmap in temps:
             maps.append(usfmap[5:-6])
         return maps
 
     def crawlLinks(self, links, pages, file=None):
+        count = 0
         res = []
         for link in pages:
             if shutdown_event.isSet():
@@ -165,17 +170,15 @@ class Crawler(threading.Thread):
                     status_code = HTTPError
 
                 if status_code == 200:
+                    count += 1
+                    print (count)
                     request = build_request(link)
                     f = urlopen(request, timeout=3)
                     xml = f.read()
-                    keywords = self.getKeyword(xml, link)
-                    l = len(keywords['keyword'])
-                    for i in range(l):
-                        keywordsURL = keywords['keyword'][i][:-1]
-                        if keywordsURL in res: continue
-                        res.append(keywordsURL)
-                        print (keywordsURL + "," + keywords['link'])
-                        file.write(keywordsURL + "," + keywords['link'] + "\n")
+                    links = self.getKeyword(xml, link)
+                    if len(links['keyword'])!=0:
+                        print (links['keyword'][0] + "," + links['link'])
+                        file.write(links['keyword'][0] + "," + links['link'] + "\n")
                         file.flush()
 
         return GAME_OVER

@@ -1,3 +1,9 @@
+# This is for the situation that we want the link that contains certain word
+# the link is the thing we want to get
+# not the element we find on that link.
+# the element can be repeated, we need to get all links contain the elements
+# change the keyword variable to do different search
+
 try:
     from urllib3 import urlopen, Request, HTTPError, URLError
 except ImportError:
@@ -142,7 +148,7 @@ class Crawler(threading.Thread):
     def getLinks(self, html):
         r=r'<loc>.*</loc>'
         re_maps = re.compile(r)
-        temps = set(re.findall(re_maps, html.decode("utf-8")))
+        temps = set(re.findall(re_maps, html.decode("utf-8").lower()))
         maps = []
         for usfmap in temps:
             maps.append(usfmap[5:-6])
@@ -151,6 +157,7 @@ class Crawler(threading.Thread):
 
     def crawlLinks(self, links, pages, file=None):
         res = []
+        count = 0
         for link in pages:
             if shutdown_event.isSet():
                 return GAME_OVER
@@ -167,6 +174,8 @@ class Crawler(threading.Thread):
                     status_code = HTTPError
 
                 if status_code == 200:
+                    count += 1
+                    print(count)
                     request = build_request(link)
                     f = urlopen(request, timeout=3)
                     xml = f.read()
