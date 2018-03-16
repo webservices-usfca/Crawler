@@ -9,3 +9,4 @@ There are some crawlers for MyUSF:
 * __video_links_v2.py__: a crawler example that crawl the video links inside MyUSF, the important part is the word that you want to crawl(unique).
 * __search_word_repeated.py__: a crawler for get the links contains certain keyword, the keyword can be repeated, links is unqiue
 * __test_crawler.py__: a test for regex correctness, you can change the keyword and the link to test if the regex is coded corretly
+* __content_page.py__: a crawler to crawl single content page
